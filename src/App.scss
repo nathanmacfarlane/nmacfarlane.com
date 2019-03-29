@@ -1,0 +1,12 @@
+@import "./utilities/_colors.scss";
+
+.sidebar {
+  background-color: $color-sidebar;
+  .icon {
+    color: $color-accent;
+  }
+}
+
+.body {
+  padding: 20px;
+}
