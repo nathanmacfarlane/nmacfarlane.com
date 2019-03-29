@@ -3,13 +3,15 @@ import React, { Component, Dispatch, ComponentClass } from "react"
 import { Action, selectPage } from "./Actions/RootAction"
 import { State as RootState } from "./Reducers/index"
 import { Layout, Menu, Icon } from "antd"
-import { BrowserRouter as Router, Route, Link } from "react-router-dom"
+import { Link, withRouter } from "react-router-dom"
 import ConnectedProjectsPage from "./Projects/ProjectsPage"
-import About from "./About/About"
+import Experience from "./Experience/Experience"
 
 const { Sider } = Layout
 
-export interface State {}
+export interface State {
+  collapsed: boolean
+}
 
 export interface Props {
   selectedPage: string
@@ -25,10 +27,10 @@ export type Page = {
 
 export const pages: Page[] = [
   {
-    title: "About Nathan",
+    title: "Work Experience",
     icon: "user",
-    url: "/about",
-    component: About
+    url: "/experience",
+    component: Experience
   },
   {
     title: "Projects",
@@ -41,31 +43,68 @@ export const pages: Page[] = [
 class Sidebar extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = {}
+    this.state = {
+      collapsed: true
+    }
+  }
+
+  private loadData = (props: any) => {
+    if (this.props.selectedPage != props.location.pathname) {
+      if (props.location.pathname == "/") {
+        this.props.selectPage(pages[0].url)
+      } else {
+        this.props.selectPage(props.location.pathname)
+      }
+    }
+  }
+
+  componentWillMount() {
+    this.loadData(this.props)
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    this.loadData(nextProps)
   }
 
   private clickedMenu = (menuItem: { key: string }) => {
     this.props.selectPage(menuItem.key)
   }
 
+  private mouseEnteredSidebar = () => {
+    this.setState({ collapsed: false })
+  }
+
+  private mouseExitedSidebar = () => {
+    this.setState({ collapsed: true })
+  }
+
   render() {
+    const IconFont = Icon.createFromIconfontCN({
+      scriptUrl: "//at.alicdn.com/t/font_8d5l8fzk5b87iudi.js"
+    })
     return (
-      <Sider width={75} className="sidebar">
+      <Sider
+        onMouseLeave={this.mouseExitedSidebar}
+        onMouseEnter={this.mouseEnteredSidebar}
+        width={this.state.collapsed ? 75 : 200}
+        className="sidebar"
+      >
         <Menu
           mode="inline"
-          inlineCollapsed={true}
           style={{ backgroundColor: "transparent", border: 0 }}
-          defaultSelectedKeys={[pages[0].title]}
+          selectedKeys={[this.props.selectedPage]}
           onClick={this.clickedMenu}
         >
           {pages.map(page => (
-            <Menu.Item key={page.title}>
+            <Menu.Item key={page.url}>
               <Link to={page.url}>
-                <Icon
+                {/* <Icon
                   className="icon"
                   style={{ fontSize: 20 }}
                   type={page.icon}
-                />
+                /> */}
+                <IconFont type="briefcase" />
+                {!this.state.collapsed && <span>{page.title}</span>}
               </Link>
             </Menu.Item>
           ))}
@@ -77,7 +116,7 @@ class Sidebar extends Component<Props, State> {
 
 const mapStateToProps = (state: RootState) => {
   return {
-    selectedPage: state.visibleBody.selectedPage
+    selectedPage: state.ui.selectedPage
   }
 }
 
@@ -87,9 +126,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   }
 }
 
-const ConnectedSidebar = connect(
+const ConnectedSidebar = withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(Sidebar)
+)(Sidebar) as React.ComponentType<any>)
 
 export default ConnectedSidebar

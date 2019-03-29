@@ -1,9 +1,9 @@
 import { connect } from "react-redux"
 import React, { Component, Dispatch } from "react"
-import { Action, getProjects } from "./Actions/RootAction"
 import { State as RootState } from "./Reducers/index"
 import { pages } from "./Sidebar"
-import { Route } from "react-router"
+import { Route, Redirect } from "react-router"
+import { withRouter } from "react-router-dom"
 
 export interface Props {
   selectedPage: string
@@ -24,6 +24,7 @@ class Body extends Component<Props, State> {
         {pages.map(page => (
           <Route path={page.url} component={page.component} />
         ))}
+        <Route exact path="/" render={() => <Redirect to="/experience" />} />
       </>
     )
   }
@@ -31,17 +32,13 @@ class Body extends Component<Props, State> {
 
 const mapStateToProps = (state: RootState) => {
   return {
-    selectedPage: state.visibleBody.selectedPage
+    selectedPage: state.ui.selectedPage
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
-  return {}
-}
-
-const ConnectedBody = connect(
+const ConnectedBody = withRouter(connect(
   mapStateToProps,
-  mapDispatchToProps
-)(Body)
+  {}
+)(Body) as React.ComponentType<any>)
 
 export default ConnectedBody

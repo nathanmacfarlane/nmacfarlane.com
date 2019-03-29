@@ -6,6 +6,7 @@ import Project from "../Models/Project"
 import ProjectCard from "../Projects/ProjectCard"
 import { Modal } from "antd"
 import ProjectDetail from "../Projects/ProjectDetail"
+import { withRouter } from "react-router"
 
 let StackGrid = require("react-stack-grid").default
 
@@ -23,7 +24,9 @@ class ProjectsPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = { projectVisible: false }
-    this.props.getProjects()
+    if (this.props.projects.length == 0) {
+      this.props.getProjects()
+    }
   }
 
   private selectedProject = (project: Project) => {
@@ -78,9 +81,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   }
 }
 
-const ConnectedProjectsPage = connect(
+const ConnectedProjectsPage = withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(ProjectsPage)
+)(ProjectsPage) as React.ComponentType<any>)
 
 export default ConnectedProjectsPage
